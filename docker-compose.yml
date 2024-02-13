@@ -11,6 +11,8 @@ services:
     environment:
       PORT: 3000
       VIRTUAL_HOST: api.nest-starter-kit.docker
+      MONGO_CONNECTION: mongodb://mongo/nest-starter
+
     ports:
       - 3000:3000
       - 9229:9229
@@ -26,58 +28,58 @@ services:
       - ./tsconfig.json:/app/tsconfig.json:ro
     networks:
       - nest-starter-kit
-  # mongo:
-  #   image: mongo:latest
-  #   container_name: mongo-container
+  mongo:
+    image: mongo:latest
+    container_name: mongo-container
+    volumes:
+      - mongo-container:/data/db
+    logging:
+      options:
+        max-size: 10m
+    networks:
+      - nest-starter-kit
+    ports:
+      - 27017:27017
+  mongo-seed:
+    build: 
+      context: ./
+      dockerfile: ./docker/migration.Dockerfile
+    networks:
+      - nest-starter-kit
+    links:
+      - mongo
+    environment:
+      - MONGO_CONNECTION=mongodb://mongo/nest-starter
+  # db:
+  #   image: postgres
+  #   restart: always
+  #   environment:
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_NAME=postgres
   #   volumes:
-  #     - mongo-container:/data/db
+  #     - ./pgdata:/var/lib/postgresql/data
+  #   ports:
+  #     - '5432:5432'
   #   logging:
-  #     options:
-  #       max-size: 10m
+  #     driver: none
   #   networks:
   #     - nest-starter-kit
-  #   ports:
-  #     - 27017:27017
-  # mongo-seed:
-    # build: 
-    #   context: ./
-    #   dockerfile: ./docker/migration.Dockerfile
-    # networks:
-    #   - nest-starter-kit
-    # links:
-    #   - mongo
-    # environment:
-    #   - MONGO_CONNECTION=mongodb://mongo/nest-starter
-  db:
-    image: postgres
-    restart: always
-    environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_NAME=postgres
-    volumes:
-      - ./pgdata:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
-    logging:
-      driver: none
-    networks:
-      - nest-starter-kit
 
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=pgadmin4
-    ports:
-      - '5050:80'
-    depends_on:
-      - db
-    logging:
-      driver: none
-    networks:
-      - nest-starter-kit
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   restart: always
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+  #     - PGADMIN_DEFAULT_PASSWORD=pgadmin4
+  #   ports:
+  #     - '5050:80'
+  #   depends_on:
+  #     - db
+  #   logging:
+  #     driver: none
+  #   networks:
+  #     - nest-starter-kit
   # zookeeper:
   #   image: docker.io/bitnami/zookeeper:latest
   #   container_name: 'zookeeper-container'

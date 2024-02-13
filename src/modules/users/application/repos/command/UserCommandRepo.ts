@@ -1,10 +1,12 @@
-import { IUserRepo } from '../IUserRepo';
 import { UserName } from '../../../domain/value-object/userName';
 import { User } from '../../../domain/aggregates/User';
 import { UserMap } from '../../mappers/UserMap';
 import { UserEmail } from '../../../domain/value-object/userEmail';
+import { IUserCommandRepo } from '../IUserCommandRepo';
+import { Injectable } from '@nestjs/common';
 
-export class SequelizeUserRepo implements IUserRepo {
+@Injectable()
+export class UserCommandRepo implements IUserCommandRepo {
   private models: any;
 
   constructor(models: any) {

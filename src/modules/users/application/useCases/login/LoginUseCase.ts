@@ -1,12 +1,13 @@
 import { LoginDTO, LoginDTOResponse } from './LoginDTO';
 import { LoginUseCaseErrors } from './LoginErrors';
-import { IUserRepo } from '../../repos/IUserRepo';
+import { IUserQueryRepo } from '../../repos/IUserQueryRepo';
 import { User } from '../../../domain/aggregates/User';
 import { UserName } from '../../../domain/value-object/userName';
 import { UserPassword } from '../../../domain/value-object/userPassword';
 import { Either, Result, success, failed } from '@app/shared/core/Result';
 import { AppError } from '@app/shared/core/AppError';
 import { UseCase } from '@app/shared/core/UseCase';
+import { Inject, Injectable } from '@nestjs/common';
 
 type Response = Either<
   | LoginUseCaseErrors.PasswordDoesntMatchError
@@ -14,13 +15,11 @@ type Response = Either<
   | AppError.UnexpectedError,
   Result<LoginDTOResponse>
 >;
-
+@Injectable()
 export class LoginUserUseCase implements UseCase<LoginDTO, Promise<Response>> {
-  private userRepo: IUserRepo;
-
-  constructor(userRepo: IUserRepo) {
-    this.userRepo = userRepo;
-  }
+  constructor(
+    @Inject('IUserQueryRepo') private userQueryRepo: IUserQueryRepo,
+  ) {}
 
   public async execute(request: LoginDTO): Promise<Response> {
     let user: User;
@@ -35,7 +34,7 @@ export class LoginUserUseCase implements UseCase<LoginDTO, Promise<Response>> {
         return failed(Result.fail<any>(payloadResult.getErrorValue()));
       }
 
-      user = await this.userRepo.getUserByUserName(userName);
+      user = await this.userQueryRepo.getUserByUserName(userName);
       const userFound = !!user;
 
       if (!userFound) {
