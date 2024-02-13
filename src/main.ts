@@ -15,6 +15,6 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, createDocument(app));
   const port = process.env.port || 3000;
   await app.listen(port);
-  logger.log(`Application Started at ${process.env.VIRTUAL_HOST}`);
+  logger.log(`Application Started at : ${process.env.VIRTUAL_HOST}`);
 }
 bootstrap();

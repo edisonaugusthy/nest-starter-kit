@@ -17,31 +17,37 @@ services:
     depends_on:
       - db
     volumes:
-      - ./src:/app/src
+      - ./src:/app/src:rw
+      - ./libs/:/app/libs:ro
+      - ./package.json:/app/package.json:ro
+      - ./package-lock.json:/app/package-lock.json:rw
+      - ./nest-cli.json:/app/nest-cli.json:ro
+      - ./tsconfig.build.json:/app/tsconfig.build.json:ro
+      - ./tsconfig.json:/app/tsconfig.json:ro
     networks:
       - nest-starter-kit
-  mongo:
-    image: mongo:latest
-    container_name: mongo-container
-    volumes:
-      - mongo-container:/data/db
-    logging:
-      options:
-        max-size: 10m
-    networks:
-      - nest-starter-kit
-    ports:
-      - 27017:27017
-  mongo-seed:
-    build: 
-      context: ./
-      dockerfile: ./docker/migration.Dockerfile
-    networks:
-      - nest-starter-kit
-    links:
-      - mongo
-    environment:
-      - MONGO_CONNECTION=mongodb://mongo/nest-starter
+  # mongo:
+  #   image: mongo:latest
+  #   container_name: mongo-container
+  #   volumes:
+  #     - mongo-container:/data/db
+  #   logging:
+  #     options:
+  #       max-size: 10m
+  #   networks:
+  #     - nest-starter-kit
+  #   ports:
+  #     - 27017:27017
+  # mongo-seed:
+    # build: 
+    #   context: ./
+    #   dockerfile: ./docker/migration.Dockerfile
+    # networks:
+    #   - nest-starter-kit
+    # links:
+    #   - mongo
+    # environment:
+    #   - MONGO_CONNECTION=mongodb://mongo/nest-starter
   db:
     image: postgres
     restart: always
@@ -72,51 +78,51 @@ services:
       driver: none
     networks:
       - nest-starter-kit
-  zookeeper:
-    image: docker.io/bitnami/zookeeper:latest
-    container_name: 'zookeeper-container'
-    ports:
-      - "2181:2181"
-    volumes:
-      - zookeeper_data:/bitnami
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
-    networks:
-      - nest-starter-kit
+  # zookeeper:
+  #   image: docker.io/bitnami/zookeeper:latest
+  #   container_name: 'zookeeper-container'
+  #   ports:
+  #     - "2181:2181"
+  #   volumes:
+  #     - zookeeper_data:/bitnami
+  #   environment:
+  #     - ALLOW_ANONYMOUS_LOGIN=yes
+  #   networks:
+  #     - nest-starter-kit
 
-  kafka:
-    image: docker.io/bitnami/kafka:latest
-    container_name: 'kafka-container'
-    ports:
-      - "9093:9093"
-      - "9092:9092"
-    volumes:
-      - kafka_data:/bitnami
-    environment:
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_ENABLE_KRAFT=no
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
-      - KAFKA_CFG_LISTENERS=CLIENT://:9093,EXTERNAL://:9092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9093,EXTERNAL://localhost:9092
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
-    depends_on:
-      - zookeeper
-    networks:
-      - nest-starter-kit
-  kafka-ui:
-    image: provectuslabs/kafka-ui
-    container_name: kafka-ui
-    restart: 'no'
-    environment:
-      KAFKA_CLUSTERS_0_NAME: platform
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
-    ports:
-      - 8080:8080
-    depends_on:
-      - 'kafka'
-    networks:
-      - nest-starter-kit
+  # kafka:
+  #   image: docker.io/bitnami/kafka:latest
+  #   container_name: 'kafka-container'
+  #   ports:
+  #     - "9093:9093"
+  #     - "9092:9092"
+  #   volumes:
+  #     - kafka_data:/bitnami
+  #   environment:
+  #     - ALLOW_PLAINTEXT_LISTENER=yes
+  #     - KAFKA_ENABLE_KRAFT=no
+  #     - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+  #     - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+  #     - KAFKA_CFG_LISTENERS=CLIENT://:9093,EXTERNAL://:9092
+  #     - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9093,EXTERNAL://localhost:9092
+  #     - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+  #   depends_on:
+  #     - zookeeper
+  #   networks:
+  #     - nest-starter-kit
+  # kafka-ui:
+  #   image: provectuslabs/kafka-ui
+  #   container_name: kafka-ui
+  #   restart: 'no'
+  #   environment:
+  #     KAFKA_CLUSTERS_0_NAME: platform
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+  #   ports:
+  #     - 8080:8080
+  #   depends_on:
+  #     - 'kafka'
+  #   networks:
+  #     - nest-starter-kit
 
 
 networks:

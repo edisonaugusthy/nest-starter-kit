@@ -26,7 +26,6 @@ export class Result<T> {
 
   public getValue(): T {
     if (!this.isSuccess) {
-      console.log(this.error);
       throw new Error(
         "Can't get the value of an error result. Use 'errorValue' instead.",
       );
@@ -55,44 +54,44 @@ export class Result<T> {
   }
 }
 
-export type Either<L, A> = Left<L, A> | Right<L, A>;
+export type Either<L, A> = Failed<L, A> | Success<L, A>;
 
-export class Left<L, A> {
-  readonly value: L;
+class Failed<ErrorType, SuccessType> {
+  readonly value: ErrorType;
 
-  constructor(value: L) {
+  constructor(value: ErrorType) {
     this.value = value;
   }
 
-  isLeft(): this is Left<L, A> {
+  isFailed(): this is Failed<ErrorType, SuccessType> {
     return true;
   }
 
-  isRight(): this is Right<L, A> {
+  isSuccess(): this is Success<ErrorType, SuccessType> {
     return false;
   }
 }
 
-export class Right<L, A> {
-  readonly value: A;
+class Success<ErrorType, SuccessType> {
+  readonly value: SuccessType;
 
-  constructor(value: A) {
+  constructor(value: SuccessType) {
     this.value = value;
   }
 
-  isLeft(): this is Left<L, A> {
+  isFailed(): this is Failed<ErrorType, SuccessType> {
     return false;
   }
 
-  isRight(): this is Right<L, A> {
+  isSuccess(): this is Success<ErrorType, SuccessType> {
     return true;
   }
 }
 
-export const left = <L, A>(l: L): Either<L, A> => {
-  return new Left(l);
+export const failed = <L, A>(l: L): Either<L, A> => {
+  return new Failed(l);
 };
 
-export const right = <L, A>(a: A): Either<L, A> => {
-  return new Right<L, A>(a);
+export const success = <L, A>(a: A): Either<L, A> => {
+  return new Success<L, A>(a);
 };
