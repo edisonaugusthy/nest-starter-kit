@@ -1,0 +1,562 @@
+{
+  "ownerApp": null,
+  "createTime": 1750613407101,
+  "updateTime": null,
+  "createdBy": null,
+  "updatedBy": null,
+  "accessPolicy": {},
+  "name": "client_suggestions_workflow",
+  "description": "Unified workflow that routes based on client_id and makes appropriate API calls",
+  "version": 1,
+  "tasks": [
+    {
+      "name": "SWITCH",
+      "taskReferenceName": "route_by_client",
+      "description": null,
+      "inputParameters": {
+        "client_type": "${workflow.input.client_id}"
+      },
+      "type": "SWITCH",
+      "dynamicTaskNameParam": null,
+      "caseValueParam": null,
+      "caseExpression": null,
+      "scriptExpression": null,
+      "decisionCases": {
+        "tma": [
+          {
+            "name": "HTTP",
+            "taskReferenceName": "tma_get_gemini",
+            "description": null,
+            "inputParameters": {
+              "http_request": {
+                "uri": "http://api:3000/gemini/suggestions",
+                "method": "GET",
+                "headers": {
+                  "Content-Type": "application/json",
+                  "Accept": "application/json"
+                },
+                "readTimeOut": 15000,
+                "connectionTimeOut": 5000
+              }
+            },
+            "type": "HTTP",
+            "dynamicTaskNameParam": null,
+            "caseValueParam": null,
+            "caseExpression": null,
+            "scriptExpression": null,
+            "dynamicForkJoinTasksParam": null,
+            "dynamicForkTasksParam": null,
+            "dynamicForkTasksInputParamName": null,
+            "startDelay": 0,
+            "subWorkflowParam": null,
+            "sink": null,
+            "optional": false,
+            "taskDefinition": null,
+            "rateLimited": null,
+            "asyncComplete": false,
+            "loopCondition": null,
+            "retryCount": 2,
+            "evaluatorType": null,
+            "expression": null
+          },
+          {
+            "name": "SWITCH",
+            "taskReferenceName": "check_gemini_success",
+            "description": null,
+            "inputParameters": {
+              "gemini_status": "${tma_get_gemini.output.response.statusCode}"
+            },
+            "type": "SWITCH",
+            "dynamicTaskNameParam": null,
+            "caseValueParam": null,
+            "caseExpression": null,
+            "scriptExpression": null,
+            "decisionCases": {
+              "200": [
+                {
+                  "name": "SET_VARIABLE",
+                  "taskReferenceName": "store_gemini_success",
+                  "description": null,
+                  "inputParameters": {
+                    "gemini_suggestion": "${tma_get_gemini.output.response.body}",
+                    "gemini_status": "success",
+                    "gemini_status_code": "200"
+                  },
+                  "type": "SET_VARIABLE",
+                  "dynamicTaskNameParam": null,
+                  "caseValueParam": null,
+                  "caseExpression": null,
+                  "scriptExpression": null,
+                  "dynamicForkJoinTasksParam": null,
+                  "dynamicForkTasksParam": null,
+                  "dynamicForkTasksInputParamName": null,
+                  "startDelay": 0,
+                  "subWorkflowParam": null,
+                  "sink": null,
+                  "optional": false,
+                  "taskDefinition": null,
+                  "rateLimited": null,
+                  "asyncComplete": false,
+                  "loopCondition": null,
+                  "retryCount": null,
+                  "evaluatorType": null,
+                  "expression": null
+                }
+              ]
+            },
+            "dynamicForkJoinTasksParam": null,
+            "dynamicForkTasksParam": null,
+            "dynamicForkTasksInputParamName": null,
+            "defaultCase": [
+              {
+                "name": "SET_VARIABLE",
+                "taskReferenceName": "store_gemini_failure",
+                "description": null,
+                "inputParameters": {
+                  "gemini_suggestion": "Gemini request failed",
+                  "gemini_status": "failed",
+                  "gemini_status_code": "${tma_get_gemini.output.response.statusCode}"
+                },
+                "type": "SET_VARIABLE",
+                "dynamicTaskNameParam": null,
+                "caseValueParam": null,
+                "caseExpression": null,
+                "scriptExpression": null,
+                "dynamicForkJoinTasksParam": null,
+                "dynamicForkTasksParam": null,
+                "dynamicForkTasksInputParamName": null,
+                "startDelay": 0,
+                "subWorkflowParam": null,
+                "sink": null,
+                "optional": false,
+                "taskDefinition": null,
+                "rateLimited": null,
+                "asyncComplete": false,
+                "loopCondition": null,
+                "retryCount": null,
+                "evaluatorType": null,
+                "expression": null
+              }
+            ],
+            "startDelay": 0,
+            "subWorkflowParam": null,
+            "sink": null,
+            "optional": false,
+            "taskDefinition": null,
+            "rateLimited": null,
+            "asyncComplete": false,
+            "loopCondition": null,
+            "retryCount": null,
+            "evaluatorType": "value-param",
+            "expression": "gemini_status"
+          },
+          {
+            "name": "HTTP",
+            "taskReferenceName": "tma_get_openai",
+            "description": null,
+            "inputParameters": {
+              "http_request": {
+                "uri": "http://api:3000/openai/suggestions",
+                "method": "GET",
+                "headers": {
+                  "Content-Type": "application/json",
+                  "Accept": "application/json"
+                },
+                "readTimeOut": 15000,
+                "connectionTimeOut": 5000
+              }
+            },
+            "type": "HTTP",
+            "dynamicTaskNameParam": null,
+            "caseValueParam": null,
+            "caseExpression": null,
+            "scriptExpression": null,
+            "dynamicForkJoinTasksParam": null,
+            "dynamicForkTasksParam": null,
+            "dynamicForkTasksInputParamName": null,
+            "startDelay": 0,
+            "subWorkflowParam": null,
+            "sink": null,
+            "optional": false,
+            "taskDefinition": null,
+            "rateLimited": null,
+            "asyncComplete": false,
+            "loopCondition": null,
+            "retryCount": 2,
+            "evaluatorType": null,
+            "expression": null
+          },
+          {
+            "name": "SWITCH",
+            "taskReferenceName": "check_openai_success",
+            "description": null,
+            "inputParameters": {
+              "openai_status": "${tma_get_openai.output.response.statusCode}"
+            },
+            "type": "SWITCH",
+            "dynamicTaskNameParam": null,
+            "caseValueParam": null,
+            "caseExpression": null,
+            "scriptExpression": null,
+            "decisionCases": {
+              "200": [
+                {
+                  "name": "SET_VARIABLE",
+                  "taskReferenceName": "store_openai_success",
+                  "description": null,
+                  "inputParameters": {
+                    "openai_suggestion": "${tma_get_openai.output.response.body}",
+                    "openai_status": "success",
+                    "openai_status_code": "200"
+                  },
+                  "type": "SET_VARIABLE",
+                  "dynamicTaskNameParam": null,
+                  "caseValueParam": null,
+                  "caseExpression": null,
+                  "scriptExpression": null,
+                  "dynamicForkJoinTasksParam": null,
+                  "dynamicForkTasksParam": null,
+                  "dynamicForkTasksInputParamName": null,
+                  "startDelay": 0,
+                  "subWorkflowParam": null,
+                  "sink": null,
+                  "optional": false,
+                  "taskDefinition": null,
+                  "rateLimited": null,
+                  "asyncComplete": false,
+                  "loopCondition": null,
+                  "retryCount": null,
+                  "evaluatorType": null,
+                  "expression": null
+                }
+              ]
+            },
+            "dynamicForkJoinTasksParam": null,
+            "dynamicForkTasksParam": null,
+            "dynamicForkTasksInputParamName": null,
+            "defaultCase": [
+              {
+                "name": "SET_VARIABLE",
+                "taskReferenceName": "store_openai_failure",
+                "description": null,
+                "inputParameters": {
+                  "openai_suggestion": "OpenAI request failed",
+                  "openai_status": "failed",
+                  "openai_status_code": "${tma_get_openai.output.response.statusCode}"
+                },
+                "type": "SET_VARIABLE",
+                "dynamicTaskNameParam": null,
+                "caseValueParam": null,
+                "caseExpression": null,
+                "scriptExpression": null,
+                "dynamicForkJoinTasksParam": null,
+                "dynamicForkTasksParam": null,
+                "dynamicForkTasksInputParamName": null,
+                "startDelay": 0,
+                "subWorkflowParam": null,
+                "sink": null,
+                "optional": false,
+                "taskDefinition": null,
+                "rateLimited": null,
+                "asyncComplete": false,
+                "loopCondition": null,
+                "retryCount": null,
+                "evaluatorType": null,
+                "expression": null
+              }
+            ],
+            "startDelay": 0,
+            "subWorkflowParam": null,
+            "sink": null,
+            "optional": false,
+            "taskDefinition": null,
+            "rateLimited": null,
+            "asyncComplete": false,
+            "loopCondition": null,
+            "retryCount": null,
+            "evaluatorType": "value-param",
+            "expression": "openai_status"
+          },
+          {
+            "name": "SET_VARIABLE",
+            "taskReferenceName": "compile_tma_results",
+            "description": null,
+            "inputParameters": {
+              "client_id": "tma",
+              "workflow_type": "sequential",
+              "providers_called": "gemini,openai",
+              "total_calls": "2",
+              "execution_timestamp": "${CPEWF_EPOCH}",
+              "final_status": "completed"
+            },
+            "type": "SET_VARIABLE",
+            "dynamicTaskNameParam": null,
+            "caseValueParam": null,
+            "caseExpression": null,
+            "scriptExpression": null,
+            "dynamicForkJoinTasksParam": null,
+            "dynamicForkTasksParam": null,
+            "dynamicForkTasksInputParamName": null,
+            "startDelay": 0,
+            "subWorkflowParam": null,
+            "sink": null,
+            "optional": false,
+            "taskDefinition": null,
+            "rateLimited": null,
+            "asyncComplete": false,
+            "loopCondition": null,
+            "retryCount": null,
+            "evaluatorType": null,
+            "expression": null
+          }
+        ],
+        "moco": [
+          {
+            "name": "HTTP",
+            "taskReferenceName": "moco_get_claudia",
+            "description": null,
+            "inputParameters": {
+              "http_request": {
+                "uri": "http://api:3000/claudia/suggestions",
+                "method": "GET",
+                "headers": {
+                  "Content-Type": "application/json",
+                  "Accept": "application/json"
+                },
+                "readTimeOut": 15000,
+                "connectionTimeOut": 5000
+              }
+            },
+            "type": "HTTP",
+            "dynamicTaskNameParam": null,
+            "caseValueParam": null,
+            "caseExpression": null,
+            "scriptExpression": null,
+            "dynamicForkJoinTasksParam": null,
+            "dynamicForkTasksParam": null,
+            "dynamicForkTasksInputParamName": null,
+            "startDelay": 0,
+            "subWorkflowParam": null,
+            "sink": null,
+            "optional": false,
+            "taskDefinition": null,
+            "rateLimited": null,
+            "asyncComplete": false,
+            "loopCondition": null,
+            "retryCount": 3,
+            "evaluatorType": null,
+            "expression": null
+          },
+          {
+            "name": "SWITCH",
+            "taskReferenceName": "check_claudia_success",
+            "description": null,
+            "inputParameters": {
+              "claudia_status": "${moco_get_claudia.output.response.statusCode}"
+            },
+            "type": "SWITCH",
+            "dynamicTaskNameParam": null,
+            "caseValueParam": null,
+            "caseExpression": null,
+            "scriptExpression": null,
+            "decisionCases": {
+              "200": [
+                {
+                  "name": "SET_VARIABLE",
+                  "taskReferenceName": "store_claudia_success",
+                  "description": null,
+                  "inputParameters": {
+                    "claudia_suggestion": "${moco_get_claudia.output.response.body}",
+                    "claudia_status": "success",
+                    "claudia_status_code": "200"
+                  },
+                  "type": "SET_VARIABLE",
+                  "dynamicTaskNameParam": null,
+                  "caseValueParam": null,
+                  "caseExpression": null,
+                  "scriptExpression": null,
+                  "dynamicForkJoinTasksParam": null,
+                  "dynamicForkTasksParam": null,
+                  "dynamicForkTasksInputParamName": null,
+                  "startDelay": 0,
+                  "subWorkflowParam": null,
+                  "sink": null,
+                  "optional": false,
+                  "taskDefinition": null,
+                  "rateLimited": null,
+                  "asyncComplete": false,
+                  "loopCondition": null,
+                  "retryCount": null,
+                  "evaluatorType": null,
+                  "expression": null
+                }
+              ]
+            },
+            "dynamicForkJoinTasksParam": null,
+            "dynamicForkTasksParam": null,
+            "dynamicForkTasksInputParamName": null,
+            "defaultCase": [
+              {
+                "name": "SET_VARIABLE",
+                "taskReferenceName": "store_claudia_failure",
+                "description": null,
+                "inputParameters": {
+                  "claudia_suggestion": "Claudia request failed",
+                  "claudia_status": "failed",
+                  "claudia_status_code": "${moco_get_claudia.output.response.statusCode}"
+                },
+                "type": "SET_VARIABLE",
+                "dynamicTaskNameParam": null,
+                "caseValueParam": null,
+                "caseExpression": null,
+                "scriptExpression": null,
+                "dynamicForkJoinTasksParam": null,
+                "dynamicForkTasksParam": null,
+                "dynamicForkTasksInputParamName": null,
+                "startDelay": 0,
+                "subWorkflowParam": null,
+                "sink": null,
+                "optional": false,
+                "taskDefinition": null,
+                "rateLimited": null,
+                "asyncComplete": false,
+                "loopCondition": null,
+                "retryCount": null,
+                "evaluatorType": null,
+                "expression": null
+              }
+            ],
+            "startDelay": 0,
+            "subWorkflowParam": null,
+            "sink": null,
+            "optional": false,
+            "taskDefinition": null,
+            "rateLimited": null,
+            "asyncComplete": false,
+            "loopCondition": null,
+            "retryCount": null,
+            "evaluatorType": "value-param",
+            "expression": "claudia_status"
+          },
+          {
+            "name": "SET_VARIABLE",
+            "taskReferenceName": "compile_moco_results",
+            "description": null,
+            "inputParameters": {
+              "client_id": "moco",
+              "workflow_type": "single",
+              "providers_called": "claudia",
+              "total_calls": "1",
+              "execution_timestamp": "${CPEWF_EPOCH}",
+              "final_status": "completed"
+            },
+            "type": "SET_VARIABLE",
+            "dynamicTaskNameParam": null,
+            "caseValueParam": null,
+            "caseExpression": null,
+            "scriptExpression": null,
+            "dynamicForkJoinTasksParam": null,
+            "dynamicForkTasksParam": null,
+            "dynamicForkTasksInputParamName": null,
+            "startDelay": 0,
+            "subWorkflowParam": null,
+            "sink": null,
+            "optional": false,
+            "taskDefinition": null,
+            "rateLimited": null,
+            "asyncComplete": false,
+            "loopCondition": null,
+            "retryCount": null,
+            "evaluatorType": null,
+            "expression": null
+          }
+        ]
+      },
+      "dynamicForkJoinTasksParam": null,
+      "dynamicForkTasksParam": null,
+      "dynamicForkTasksInputParamName": null,
+      "defaultCase": [
+        {
+          "name": "SET_VARIABLE",
+          "taskReferenceName": "invalid_client_error",
+          "description": null,
+          "inputParameters": {
+            "error": "invalid_client_id",
+            "message": "Unsupported client ID. Supported: tma, moco",
+            "client_id": "${workflow.input.client_id}",
+            "supported_clients": "tma,moco",
+            "final_status": "error"
+          },
+          "type": "SET_VARIABLE",
+          "dynamicTaskNameParam": null,
+          "caseValueParam": null,
+          "caseExpression": null,
+          "scriptExpression": null,
+          "dynamicForkJoinTasksParam": null,
+          "dynamicForkTasksParam": null,
+          "dynamicForkTasksInputParamName": null,
+          "startDelay": 0,
+          "subWorkflowParam": null,
+          "sink": null,
+          "optional": false,
+          "taskDefinition": null,
+          "rateLimited": null,
+          "asyncComplete": false,
+          "loopCondition": null,
+          "retryCount": null,
+          "evaluatorType": null,
+          "expression": null
+        }
+      ],
+      "startDelay": 0,
+      "subWorkflowParam": null,
+      "sink": null,
+      "optional": false,
+      "taskDefinition": null,
+      "rateLimited": null,
+      "asyncComplete": false,
+      "loopCondition": null,
+      "retryCount": null,
+      "evaluatorType": "value-param",
+      "expression": "client_type"
+    }
+  ],
+  "inputParameters": ["client_id"],
+  "outputParameters": {
+    "client_id": "${workflow.variables.client_id}",
+    "workflow_type": "${workflow.variables.workflow_type}",
+    "providers_called": "${workflow.variables.providers_called}",
+    "total_calls": "${workflow.variables.total_calls}",
+    "execution_timestamp": "${workflow.variables.execution_timestamp}",
+    "final_status": "${workflow.variables.final_status}",
+    "results": {
+      "gemini": {
+        "suggestion": "${workflow.variables.gemini_suggestion}",
+        "status": "${workflow.variables.gemini_status}",
+        "status_code": "${workflow.variables.gemini_status_code}"
+      },
+      "openai": {
+        "suggestion": "${workflow.variables.openai_suggestion}",
+        "status": "${workflow.variables.openai_status}",
+        "status_code": "${workflow.variables.openai_status_code}"
+      },
+      "claudia": {
+        "suggestion": "${workflow.variables.claudia_suggestion}",
+        "status": "${workflow.variables.claudia_status}",
+        "status_code": "${workflow.variables.claudia_status_code}"
+      }
+    },
+    "error": "${workflow.variables.error}",
+    "message": "${workflow.variables.message}",
+    "supported_clients": "${workflow.variables.supported_clients}"
+  },
+  "failureWorkflow": null,
+  "schemaVersion": 2,
+  "restartable": true,
+  "workflowStatusListenerEnabled": false,
+  "ownerEmail": null,
+  "timeoutPolicy": "ALERT_ONLY",
+  "timeoutSeconds": 240,
+  "variables": {},
+  "inputTemplate": {}
+}

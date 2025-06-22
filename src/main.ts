@@ -16,5 +16,8 @@ async function bootstrap() {
   const port = process.env.port || 3000;
   await app.listen(port);
   logger.log(`Application Started at : ${process.env.VIRTUAL_HOST}`);
+  logger.log(`Swagger UI at : ${process.env.VIRTUAL_HOST}/api`);
+  logger.log(`Conductor UI is running on: http://localhost:5001`);
+  logger.log(`Application is running on: ${process.env.VIRTUAL_HOST}`);
 }
 bootstrap();

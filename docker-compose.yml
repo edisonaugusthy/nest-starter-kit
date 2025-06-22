@@ -1,23 +1,25 @@
-version: '3.7'
-
 services:
   api:
     build:
       context: ./
       dockerfile: ./docker/Dockerfile
-    command: ['npm','run','start:debug']
+    command: ['npm', 'run', 'start:debug']
     restart: on-failure
     container_name: nest-starter-kit
     environment:
       PORT: 3000
       VIRTUAL_HOST: api.nest-starter-kit.docker
       MONGO_CONNECTION: mongodb://mongo/nest-starter
+      # conductor
+      CONDUCTOR_SERVER_URL: http://conductor-server:8080/api
+      CONDUCTOR_AUTH_KEY: your_access_key_here
+      CONDUCTOR_AUTH_SECRET: your_secret_here
 
     ports:
       - 3000:3000
       - 9229:9229
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
     volumes:
       - ./src:/app/src:rw
       - ./libs/:/app/libs:ro
@@ -41,7 +43,7 @@ services:
     ports:
       - 27017:27017
   mongo-seed:
-    build: 
+    build:
       context: ./
       dockerfile: ./docker/migration.Dockerfile
     networks:
@@ -125,7 +127,28 @@ services:
   #     - 'kafka'
   #   networks:
   #     - nest-starter-kit
-
+  # Orkes Conductor Community Edition (Open Source)
+  conductor-server:
+    image: orkesio/orkes-conductor-community-standalone:latest
+    container_name: conductor-server
+    ports:
+      - '8080:8080' # Conductor API Server
+      - '5001:5000' # Conductor UI
+    volumes:
+      - conductor-redis:/redis
+      - conductor-postgres:/pgdata
+      - ./workflows:/opt/workflows:ro
+    environment:
+      - CONFIG_PROP=config.properties
+    networks:
+      - nest-starter-kit
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/health']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
 networks:
   nest-starter-kit:
@@ -135,4 +158,8 @@ volumes:
   kafka_data:
     driver: local
   zookeeper_data:
+    driver: local
+  conductor-redis:
+    driver: local
+  conductor-postgres:
     driver: local
